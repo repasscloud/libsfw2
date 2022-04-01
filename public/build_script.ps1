@@ -25,6 +25,7 @@ foreach ($sf in $SourceFiles)
       -AbsoluteUri $adr_absoluteuri `
       -InstallSwitches $adr_installswitches `
       -DisplayName $adr_displayname `
+      -UninstallProcess 
       -UninstallArgs $adr_uninstallargs `
       -LCID $adr_lcid `
       -RebootRequired $adr_rebootrequired `
