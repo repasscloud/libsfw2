@@ -16,10 +16,6 @@ clone_folder: C:\Projects\libsfw2
 
 install:
 - git submodule update --init --recursive
-- git fetch libsfw-ps main
-- git fetch data/corelib main
-- git subtree pull --prefix=libsfw-ps libsfw-ps main --squash
-- git subtree pull --prefix=data/corelib data/corelib main --squash
 - ps: .\private\ci-tools\remove-apps.ps1
 - git clone -q --branch=main https://github.com/danijeljw-RPC/optechx.DownloadFile.git C:\Projects\optechx.DownloadFile
 - ps: .\private\ci-tools\install-tools.ps1
