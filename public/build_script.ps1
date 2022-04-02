@@ -19,19 +19,20 @@ foreach ($sf in $SourceFiles)
       -Version $adr_version `
       -Copyright $adr_copyright `
       -LicenseAcceptRequired $adr_licenseacceptrequired `
+      -LCID $adr_lcid `
       -Arch $adr_arch `
-      -ExecType $adr_exectype `
       -FollowUri $adr_followuri `
       -AbsoluteUri $adr_absoluteuri `
-      -InstallSwitches $adr_installswitches `
+      -ExecType $adr_exectype `
+      -InstallCmd $adr_installcmd `
+      -InstallArgs $adr_installargs `
       -DisplayName $adr_displayname `
+      -DetectMethod $adr_detectmethod `
       -UninstallProcess $adr_uninstallprocess `
       -UninstallArgs $adr_uninstallargs `
-      -LCID $adr_lcid `
       -RebootRequired $adr_rebootrequired `
       -XFT $adr_xft `
       -Locale $adr_locale `
-      -RepoGeo $adr_geo `
       -OutPath $PSScriptRoot `
       -NuspecUri $adr_nuspec
 }
