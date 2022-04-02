@@ -74,6 +74,6 @@ if ($AlreadyInstalled.Count -eq 957)
   $JsonData.install.displayname
 
   "installing adobe"
-  Start-Process -FilePath "'$env:TMP\$($JsonData.meta.filename)'" -ArgumentList "'$($JsonData.install.installswitches)'" -Wait
+  Start-Process -FilePath "$env:TMP\$($JsonData.meta.filename)" -ArgumentList "'$($JsonData.install.installswitches)'" -Wait
 
 }
