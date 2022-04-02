@@ -42,6 +42,12 @@ foreach ($sf in $SourceFiles)
       -OutPath $PSScriptRoot `
       -NuspecUri $adr_nuspec
     
+      $JsonData = Get-Content -Path C:\Projects\libsfw2\public\adobe_acrobatreaderdc_22.001.20085_x64_exe_MUI.json | ConvertFrom-Json
+      $JsonData.install.displayname
+    
+      "installing adobe"
+      Start-Process -FilePath "$env:TMP\$($JsonData.meta.filename)" -ArgumentList "'$($JsonData.install.installswitches)'" -Wait
+
     # verify installed application
     foreach ($Path in $hklmPaths)
     {
