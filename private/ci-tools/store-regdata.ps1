@@ -6,6 +6,10 @@
 foreach ($Path in $hklmPaths)
 {
     Get-ChildItem -Path $Path | Get-ItemProperty | Where-Object -FilterScript {$null -notlike $_.DisplayName} | Select-Object -Property Publisher,DisplayName,DisplayVersion | Export-Csv -Path C:\Projects\libsfw2\public\installed_report.csv -NoTypeInformation
+}
+foreach ($Path in $hklmPaths)
+{
+    Get-ChildItem -Path $Path | Get-ItemProperty | Where-Object -FilterScript {$_.DisplayName -like "*Adobe*"} | Select-Object -Property Publisher,DisplayName,DisplayVersion
 } 
 
 $Count = (Import-Csv -Path C:\Projects\libsfw2\public\installed_report.csv).Count
