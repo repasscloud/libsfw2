@@ -1,8 +1,3 @@
-[System.Array]$hklmPaths = @(
-    "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall",
-    "HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall"
-)
-
 # uninstall Google Update Tool
 [System.String]$app_i = "Google Auto Update Tool"
 Write-Output "$([System.Char]::ConvertFromUTF32("0x1F7E1")) UNINSTALLING ${app_i}"
