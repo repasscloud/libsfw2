@@ -40,3 +40,36 @@ foreach ($sf in $SourceFiles)
 Get-ChildItem -Path $env:APPVEYOR_BUILD_FOLDER -Filter "*.json" -File -Recurse | ForEach-Object {
     #Invoke-OXAppIngest -BaseUri $env:API_BASE_URI -JsonPayload $_.FullName
 }
+
+
+[System.Array]$hklmPaths = @(
+  "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall",
+  "HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall"
+)
+
+foreach ($Path in $hklmPaths)
+{
+  Get-ChildItem -Path $Path | Get-ItemProperty | Where-Object -FilterScript {$null -notlike $_.DisplayName} | Select-Object -Property Publisher,DisplayName,DisplayVersion | Export-Csv -Path C:\Projects\libsfw2\public\installed_report2.csv -NoTypeInformation
+} 
+
+$NewlyChecked = Import-Csv -Path C:\Projects\libsfw2\public\installed_report2.csv
+
+$AlreadyInstalled = Import-Csv -Path C:\Projects\libsfw2\public\installed_report.csv
+
+if ($NewlyCheck.Count -eq $AlreadyInstalled.Count)
+{
+  "newly checked matched already checked"
+}
+else
+{
+  "newly checked not match already checked"  
+}
+
+if ($AlreadyInstalled.Count -eq 957)
+{
+  $JsonData = Get-Content -Path C:\Projects\libsfw2\public\adobe_acrobatreaderdc_22.001.20085_x64_exe_MUI.json | ConvertFrom-Json
+  $JsonData.install.displayname
+
+  Start-Process -FilePath "$env:TMP\$($JsonData.meta.filename)" -ArgumentList "$($JsonData.install.installswitches)" -Wait
+
+}
