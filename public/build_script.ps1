@@ -46,7 +46,8 @@ foreach ($sf in $SourceFiles)
     $JsonData.install.displayname
   
     "installing adobe"
-    Start-Process -FilePath "$env:TMP\$($JsonData.meta.filename)" -ArgumentList "'$($JsonData.install.installswitches)'" -Wait
+    $SwitchesToVerifyInstall = $JsonData.install.installswitches
+    Start-Process -FilePath "$env:TMP\$($JsonData.meta.filename)" -ArgumentList "${SwitchesToVerifyInstall}" -Wait
 
     # HKLM Paths
     [System.Array]$hklmPaths = @(
@@ -61,9 +62,9 @@ foreach ($sf in $SourceFiles)
     $InstalledAfter = Import-Csv -Path C:\Projects\libsfw2\regdata-after-finish.csv | Select-Object -ExpandProperty DisplayName
 
     foreach ($Install in $InstalledAfter)
-{
-    if ($InstalledBefore -notcontains $Install)
     {
+      if ($InstalledBefore -notcontains $Install)
+      {
         $Mapped = Import-Csv -Path C:\Projects\libsfw2\regdata-after-finish.csv | Where-Object -FilterScript {$_.DisplayName -like $Install}
 
         [System.String]$DisplayName = $Mapped.DisplayName
@@ -77,8 +78,8 @@ foreach ($sf in $SourceFiles)
         $DisplayVersion
         $DisplayPublisher
         $UninstallString
+      }
     }
-}
 }
 
 
