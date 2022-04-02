@@ -4,5 +4,5 @@
     "HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall"
 )
 
-Get-ChildItem -Path $hklmPaths | Get-ItemProperty | Where-Object -FilterScript {$null -notlike $_.DisplayName} | Export-Csv -Path C:\Projects\libsfw2\regdata-before-start.csv -NoTypeInformation 
-
+# Export data to CSV dump file
+Get-ChildItem -Path $hklmPaths | Get-ItemProperty | Where-Object -FilterScript {$null -notlike $_.DisplayName} | Export-Csv -Path "$env:TMP\CSV_PRE-INSTALL_DUMP.csv" -NoTypeInformation 
