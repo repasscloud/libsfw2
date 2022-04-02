@@ -42,22 +42,48 @@ foreach ($sf in $SourceFiles)
       -OutPath $PSScriptRoot `
       -NuspecUri $adr_nuspec
     
-      $JsonData = Get-Content -Path C:\Projects\libsfw2\public\adobe_acrobatreaderdc_22.001.20085_x64_exe_MUI.json | ConvertFrom-Json
-      $JsonData.install.displayname
-    
-      "installing adobe"
-      Start-Process -FilePath "$env:TMP\$($JsonData.meta.filename)" -ArgumentList "'$($JsonData.install.installswitches)'" -Wait
+    $JsonData = Get-Content -Path C:\Projects\libsfw2\public\adobe_acrobatreaderdc_22.001.20085_x64_exe_MUI.json | ConvertFrom-Json
+    $JsonData.install.displayname
+  
+    "installing adobe"
+    Start-Process -FilePath "$env:TMP\$($JsonData.meta.filename)" -ArgumentList "'$($JsonData.install.installswitches)'" -Wait
 
-    
+    # HKLM Paths
+    [System.Array]$hklmPaths = @(
+      "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall",
+      "HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall"
+    )
+
+    Write-Output "Export CSV data"
+    Get-ChildItem -Path $hklmPaths | Get-ItemProperty | Where-Object -FilterScript {$null -notlike $_.DisplayName} | Export-Csv -Path C:\Projects\libsfw2\regdata-after-finish.csv -NoTypeInformation
+
+    $InstalledBefore = Import-Csv -Path C:\Projects\libsfw2\regdata-before-start.csv | Select-Object -ExpandProperty DisplayName
+    $InstalledAfter = Import-Csv -Path C:\Projects\libsfw2\regdata-after-finish.csv | Select-Object -ExpandProperty DisplayName
+
+    foreach ($Install in $InstalledAfter)
+{
+    if ($InstalledBefore -notcontains $Install)
+    {
+        $Mapped = Import-Csv -Path C:\Projects\libsfw2\regdata-after-finish.csv | Where-Object -FilterScript {$_.DisplayName -like $Install}
+
+        [System.String]$DisplayName = $Mapped.DisplayName
+        [System.String]$DisplayVersion = $Mapped.DisplayVersion
+        [System.String]$DisplayPublisher = $Mapped.Publisher
+        [System.String]$UninstallString = $Mapped.UninstallString
+
+
+
+        $DisplayName
+        $DisplayVersion
+        $DisplayPublisher
+        $UninstallString
+    }
+}
 }
 
-# HKLM Paths
-[System.Array]$hklmPaths = @(
-    "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall",
-    "HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall"
-)
 
-Get-ChildItem -Path $hklmPaths | Get-ItemProperty | Where-Object -FilterScript {$null -notlike $_.DisplayName} | Export-Csv -Path C:\Projects\libsfw2\regdata-after-finish.csv -NoTypeInformation 
+
+
 
 
 
