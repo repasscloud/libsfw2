@@ -42,6 +42,25 @@ Get-ChildItem -Path $env:APPVEYOR_BUILD_FOLDER -Filter "*.json" -File -Recurse |
 }
 
 
+$AlreadyInstalled = Import-Csv -Path C:\Projects\libsfw2\public\installed_report.csv
+if ($AlreadyInstalled.Count -eq 957)
+{
+  $JsonData = Get-Content -Path C:\Projects\libsfw2\public\adobe_acrobatreaderdc_22.001.20085_x64_exe_MUI.json | ConvertFrom-Json
+  $JsonData.install.displayname
+
+  "installing adobe"
+  Start-Process -FilePath "$env:TMP\$($JsonData.meta.filename)" -ArgumentList "'$($JsonData.install.installswitches)'" -Wait
+}
+
+
+
+
+
+
+
+
+
+
 [System.Array]$hklmPaths = @(
   "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall",
   "HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall"
@@ -54,26 +73,4 @@ foreach ($Path in $hklmPaths)
 
 $NewlyChecked = Import-Csv -Path C:\Projects\libsfw2\public\installed_report2.csv
 
-$AlreadyInstalled = Import-Csv -Path C:\Projects\libsfw2\public\installed_report.csv
-
-if ($NewlyChecked.Count -eq $AlreadyInstalled.Count)
-{
-  "newly checked matched already checked"
-}
-else
-{
-  "newly checked not match already checked"  
-
-  $AlreadyInstalled.Count
-  $NewlyChecked.Count
-}
-
-if ($AlreadyInstalled.Count -eq 957)
-{
-  $JsonData = Get-Content -Path C:\Projects\libsfw2\public\adobe_acrobatreaderdc_22.001.20085_x64_exe_MUI.json | ConvertFrom-Json
-  $JsonData.install.displayname
-
-  "installing adobe"
-  Start-Process -FilePath "$env:TMP\$($JsonData.meta.filename)" -ArgumentList "'$($JsonData.install.installswitches)'" -Wait
-
-}
+$NewlyChecked.Count
