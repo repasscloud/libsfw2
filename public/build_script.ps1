@@ -5,6 +5,12 @@ foreach ($function in $Functions)
   Get-ChildItem -Path $env:APPVEYOR_BUILD_FOLDER\libsfw-ps -Filter "${function}" -File | ForEach-Object { . $_.FullName }
 }
 
+<# CORELIB VARIABLES #>
+[System.Array]$hklmPaths = @(
+  "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall",
+  "HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall"
+)
+
 <# SOURCE CORELIB FILES #>
 [System.String[]]$SourceFiles = Get-ChildItem -Path .\data\corelib\ -Filter "*.ps1" -File -Recurse | Select-Object -ExpandProperty FullName
 foreach ($sf in $SourceFiles)
@@ -35,6 +41,12 @@ foreach ($sf in $SourceFiles)
       -Locale $adr_locale `
       -OutPath $PSScriptRoot `
       -NuspecUri $adr_nuspec
+    
+    # verify installed application
+    foreach ($Path in $hklmPaths)
+    {
+      Get-ChildItem -Path $Path | Get-ItemProperty | Where-Object -FilterScript {$_.DisplayName -like "*${adr_publisher}*"} | Select-Object -Property Publisher,DisplayName,DisplayVersion
+    } 
 }
 
 Get-ChildItem -Path $env:APPVEYOR_BUILD_FOLDER -Filter "*.json" -File -Recurse | ForEach-Object {
@@ -42,17 +54,15 @@ Get-ChildItem -Path $env:APPVEYOR_BUILD_FOLDER -Filter "*.json" -File -Recurse |
 }
 
 
-$AlreadyInstalled = Import-Csv -Path C:\Projects\libsfw2\public\installed_report.csv
-if ($AlreadyInstalled.Count -eq 957)
-{
-  $JsonData = Get-Content -Path C:\Projects\libsfw2\public\adobe_acrobatreaderdc_22.001.20085_x64_exe_MUI.json | ConvertFrom-Json
-  $JsonData.install.displayname
+# $AlreadyInstalled = Import-Csv -Path C:\Projects\libsfw2\public\installed_report.csv
+# if ($AlreadyInstalled.Count -eq 957)
+# {
+#   $JsonData = Get-Content -Path C:\Projects\libsfw2\public\adobe_acrobatreaderdc_22.001.20085_x64_exe_MUI.json | ConvertFrom-Json
+#   $JsonData.install.displayname
 
-  "installing adobe"
-  Start-Process -FilePath "$env:TMP\$($JsonData.meta.filename)" -ArgumentList "'$($JsonData.install.installswitches)'" -Wait
-}
-
-
+#   "installing adobe"
+#   Start-Process -FilePath "$env:TMP\$($JsonData.meta.filename)" -ArgumentList "'$($JsonData.install.installswitches)'" -Wait
+# }
 
 
 
@@ -61,16 +71,18 @@ if ($AlreadyInstalled.Count -eq 957)
 
 
 
-[System.Array]$hklmPaths = @(
-  "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall",
-  "HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall"
-)
 
-foreach ($Path in $hklmPaths)
-{
-  Get-ChildItem -Path $Path | Get-ItemProperty | Where-Object -FilterScript {$null -notlike $_.DisplayName} | Select-Object -Property Publisher,DisplayName,DisplayVersion | Export-Csv -Path C:\Projects\libsfw2\public\installed_report2.csv -NoTypeInformation
-} 
 
-$NewlyChecked = Import-Csv -Path C:\Projects\libsfw2\public\installed_report2.csv
+# [System.Array]$hklmPaths = @(
+#   "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall",
+#   "HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall"
+# )
 
-$NewlyChecked.Count
+# foreach ($Path in $hklmPaths)
+# {
+#   Get-ChildItem -Path $Path | Get-ItemProperty | Where-Object -FilterScript {$null -notlike $_.DisplayName} | Select-Object -Property Publisher,DisplayName,DisplayVersion | Export-Csv -Path C:\Projects\libsfw2\public\installed_report2.csv -NoTypeInformation
+# } 
+
+# $NewlyChecked = Import-Csv -Path C:\Projects\libsfw2\public\installed_report2.csv
+
+# $NewlyChecked.Count
