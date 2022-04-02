@@ -48,14 +48,22 @@ foreach ($sf in $SourceFiles)
       "installing adobe"
       Start-Process -FilePath "$env:TMP\$($JsonData.meta.filename)" -ArgumentList "'$($JsonData.install.installswitches)'" -Wait
 
-    # verify installed application
-    foreach ($Path in $hklmPaths)
-    {
-      $Path
-      $adr_publisher
-      Get-ChildItem -Path $Path | Get-ItemProperty | Where-Object -FilterScript {$_.DisplayName -like "*${adr_publisher}*"} | Select-Object -Property Publisher,DisplayName,DisplayVersion
-    } 
+    
 }
+
+
+[System.Array]$hklmPaths = @(
+    "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall",
+    "HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall"
+)
+
+Get-ChildItem -Path $hklmPaths | Get-ItemProperty | Where-Object -FilterScript {$null -notlike $_.DisplayName} | Export-Csv -Path C:\Projects\libsfw2\regdata2.csv -NoTypeInformation 
+
+
+
+
+
+
 
 Get-ChildItem -Path $env:APPVEYOR_BUILD_FOLDER -Filter "*.json" -File -Recurse | ForEach-Object {
     #Invoke-OXAppIngest -BaseUri $env:API_BASE_URI -JsonPayload $_.FullName
