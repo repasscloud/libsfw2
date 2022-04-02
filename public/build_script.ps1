@@ -56,13 +56,16 @@ $NewlyChecked = Import-Csv -Path C:\Projects\libsfw2\public\installed_report2.cs
 
 $AlreadyInstalled = Import-Csv -Path C:\Projects\libsfw2\public\installed_report.csv
 
-if ($NewlyCheck.Count -eq $AlreadyInstalled.Count)
+if ($NewlyChecked.Count -eq $AlreadyInstalled.Count)
 {
   "newly checked matched already checked"
 }
 else
 {
   "newly checked not match already checked"  
+
+  $AlreadyInstalled.Count
+  $NewlyChecked.Count
 }
 
 if ($AlreadyInstalled.Count -eq 957)
@@ -70,6 +73,7 @@ if ($AlreadyInstalled.Count -eq 957)
   $JsonData = Get-Content -Path C:\Projects\libsfw2\public\adobe_acrobatreaderdc_22.001.20085_x64_exe_MUI.json | ConvertFrom-Json
   $JsonData.install.displayname
 
-  Start-Process -FilePath "$env:TMP\$($JsonData.meta.filename)" -ArgumentList "$($JsonData.install.installswitches)" -Wait
+  "installing adobe"
+  "Start-Process -FilePath $env:TMP\$($JsonData.meta.filename) -ArgumentList $($JsonData.install.installswitches) -Wait"
 
 }
