@@ -45,6 +45,8 @@ foreach ($sf in $SourceFiles)
     # verify installed application
     foreach ($Path in $hklmPaths)
     {
+      $Path
+      $adr_publisher
       Get-ChildItem -Path $Path | Get-ItemProperty | Where-Object -FilterScript {$_.DisplayName -like "*${adr_publisher}*"} | Select-Object -Property Publisher,DisplayName,DisplayVersion
     } 
 }
