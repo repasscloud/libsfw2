@@ -33,8 +33,11 @@ foreach ($sf in $SourceFiles)
     -InstallCmd $adr_installcmd `
     -InstallArgs $adr_installargs `
     -DisplayName $adr_displayname `
+    -DisplayPublisher $adr_displaypublisher `
+    -DisplayVersion $adr_displayversion `
     -DetectMethod $adr_detectmethod `
     -UninstallProcess $adr_uninstallprocess `
+    -UninstallCmd $adr_uninstallcmd `
     -UninstallArgs $adr_uninstallargs `
     -RebootRequired $adr_rebootrequired `
     -XFT $adr_xft `
