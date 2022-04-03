@@ -16,14 +16,14 @@ clone_folder: C:\Projects\libsfw2
 
 install:
 - git submodule update --init --recursive
-- ps: .\private\ci-tools\remove-apps.ps1
-- ps: .\private\ci-tools\store-regdata.ps1
+- ps: .\private\ci-tools\Remove-Apps.ps1
+- ps: .\private\ci-tools\Store-RegData.ps1
 - git clone -q --branch=main https://github.com/danijeljw-RPC/optechx.DownloadFile.git C:\Projects\optechx.DownloadFile
-- ps: .\private\ci-tools\install-tools.ps1
+- ps: .\private\ci-tools\Install-Tools.ps1
 
 build_script:
 - ps: |
-    .\public\build_script.ps1
+    .\public\Build_Script.ps1
 
 # on_finish:
 #  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
