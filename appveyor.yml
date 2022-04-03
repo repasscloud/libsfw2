@@ -10,7 +10,13 @@ environment:
     secure: r0u84wIl/TFi0GhvIGeepiFhM07ADHF0K+PCcPohOIX7KTqwcgg0nZHCxmye2Gdj7ucjMUaZVG7dc1UCguWqyHiQAml63uchdJbLKQSpwE4=
   API_BASE_URI:
     secure: 09rVGQX6UZVLPq2SyXvcvX6F5s8dIq5QLyfbJEvp465H72DFLlsl5VruTU4dfKvX
-
+  MC_URI_UPCLOUD_AU_SYD_07:
+    secure: n5noMiW3hy89NPvao7ewk23Hx4LfL3IFl4+O/T7/PJ6cCK8INqy3MG9eWFI3+V/bbNaFkZZrE2Hy6691ckX+MQ==
+  MC_AK_UPCLOUD_AU_SYD_07:
+    secure: AONwV+OaTn/H/rIptGPSMv3XvFvU40CkJ0rmUk9w314=
+  MC_SK_UPCLOUD_AU_SYD_07:
+    secure: tcgnyCSUD/rigxB9TJ62EoYrHa7V6oWzhsuw10F5UmxeFlZfg3U0AdO9Py1N9aCX
+    
 shallow_clone: false
 clone_folder: C:\Projects\libsfw2
 
