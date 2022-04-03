@@ -36,6 +36,7 @@ foreach ($sf in $SourceFiles)
     -DisplayPublisher $adr_displaypublisher `
     -DisplayVersion $adr_displayversion `
     -DetectMethod $adr_detectmethod `
+    -DetectValue $adr_detectvalue `
     -UninstallProcess $adr_uninstallprocess `
     -UninstallCmd $adr_uninstallcmd `
     -UninstallArgs $adr_uninstallargs `
