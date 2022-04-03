@@ -5,12 +5,6 @@ foreach ($function in $Functions)
     Get-ChildItem -Path $env:APPVEYOR_BUILD_FOLDER\libsfw-ps -Filter "${function}" -File | ForEach-Object { . $_.FullName }
 }
 
-<# CORELIB VARIABLES #>
-[System.Array]$hklmPaths = @(
-    "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall",
-    "HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall"
-)
-
 <# SOURCE CORELIB FILES #>
 [System.String[]]$SourceFiles = Get-ChildItem -Path .\data\corelib\ -Filter "*.ps1" -File -Recurse | Select-Object -ExpandProperty FullName
 foreach ($sf in $SourceFiles)
