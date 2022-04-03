@@ -1,8 +1,8 @@
 function Install-ApplicationPackage {
     [CmdletBinding()]
     param (
-        [System.String]$PackageName,
         [System.String]$InstallerType,
+        [System.String]$PackageName,
         [System.String]$FileName,
         [System.String]$InstallSwitches,
         [System.String]$DLPath
@@ -18,7 +18,7 @@ function Install-ApplicationPackage {
             Write-Output "$([System.Char]::ConvertFromUTF32("0x1F7E2")) INSTALLING APPLICATION: ${PackageName}"
             try
             {
-                Start-Process -FilePath "${download_path}" -ArgumentList "${InstallSwitches}" -Wait -ErrorAction Stop
+                Start-Process -FilePath "${download_path}" -ArgumentList "`"${InstallSwitches}`"" -Wait -ErrorAction Stop
                 Write-Output "$([System.Char]::ConvertFromUTF32("0x1F7E2")) INSTALL SUCCESSFULL: ${PackageName}"
                 Start-Sleep -Seconds 3
             }

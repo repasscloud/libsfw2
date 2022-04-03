@@ -2,45 +2,70 @@ function Export-JsonManifest {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory=$true)]
-            [ValidateSet("Productivity","Internet")]
+            [ValidateSet("Productivity","Microsoft","Utility","Developer Tools",
+            "Games","Photo & Design","Entertainment","Security","Education",
+            "Internet","Lifestyles")]
             [System.String]$Category,                                                           #^ select from categories
         [Parameter(Mandatory=$true)][System.String]$Publisher,                                  #^ publisher name
         [Parameter(Mandatory=$true)][System.String]$Name,                                       #^ application name
         [Parameter(Mandatory=$true)][System.String]$Version,                                    #^ application version
         [System.String]$Copyright=[System.String]::Empty,                                       # copyright notice
         [System.Boolean]$LicenseAcceptRequired=$false,                                          # should default to true only if is required
-        [Parameter(Mandatory=$true)][ValidateSet("x64","x86")][System.String]$Arch,             #^ architecture of cpu
-        [Parameter(Mandatory=$true)][ValidateSet("exe","msi")][System.String]$ExecType,         #^ executable type
+        [System.Boolean]$RebootRequired=$false,                                                 # is a reboot required
+        [Parameter(Mandatory=$true)][System.String]$Lcid,                                       #^ language being supported here  <~ too many languages to isolate here https://github.com/repasscloud/libsfw-ps/issues/5#issuecomment-1086025038
+        [Parameter(Mandatory=$true)]
+            [ValidateSet("x64","x86","aarch32","arm64")]
+            [System.String]$Arch,                                                               #^ architecture of cpu
         [System.String]$FileName=[System.String]::Empty,                                        #% file name
         [System.String]$SHA256=[System.String]::Empty,                                          #% sha256 hash
         [Parameter(Mandatory=$true)][System.String]$FollowUri,                                  #^ uri provided to search for
         [System.String]$AbsoluteUri,                                                            #% the follow_on uri found
-        [System.String]$InstallSwitches=[System.String]::Empty,                                 # which install switches
+        [Parameter(Mandatory=$true)]
+        [ValidateSet("msi","msix","exe","bat","ps1","zip","script","cab")]
+            [System.String]$ExecType,                                                           #^ executable type
+
+        [System.String]$InstallCmd=[System.String]::Empty,                                      # which install cmd
+        [System.String]$InstallArgs=[System.String]::Empty,                                     # which install arguments
+        [System.String]$InstallScript=[System.String]::Empty,                                   # which install script, must be a full script, used for LoB apps
+
+        
         [System.String]$DisplayName=[System.String]::Empty,                                     #% registry display name (should be provided to identify)
         [System.String]$DisplayPublisher=[System.String]::Empty,                                #% registry display publisher
         [System.String]$DisplayVersion=[System.String]::Empty,                                  #% registry display version
-        [ValidateSet("Registry","FileVersion","File","Script")]
-            [System.String]$DetectMethod="Registry",                                            # how is app detected (registry, fileversion, filematched, script)
-        [System.String]$DetectValue=[System.String]::Empty,                                     # the value for the type
-        [System.String]$UninstallProcess=[System.String]::Empty,                                #% exe, exe2, msi, etc
-        [System.String]$UninstallString=[System.String]::Empty,                                 #% how is the uninstall proceessed (used in conjunction with above)
-        [System.String]$UninstallArgs=[System.String]::Empty,                                   #% any arguments to be provided to uninstaller (not for MSI usually)
+        
+        
+        [ValidateSet("Registry","FileVersion","File","Script","Void")]
+            [System.String]$DetectMethod,                                                       # how is app detected (registry, fileversion, filematched, script)
+        [System.String]$DetectValue=[System.String]::Empty,                                     # the value for the DetectMethod, not compatible with DetectScript
+        [System.String]$DetectScript=[System.String]::Empty,                                    # script to detect application, used for LoB apps
+
+
+        
+        [Parameter(Mandatory=$true)]
+            [ValidateSet("void_uninstall","msi","exe","exe2","inno","script")]
+            [System.String]$UninstallProcess=[System.String]::Empty,                            #% exe, exe2, msi, etc
+        
+        [System.String]$UninstallCmd=[System.String]::Empty,                                    # how is the uninstall proceessed (used with -UninstallProcess)
+        [System.String]$UninstallArgs=[System.String]::Empty,                                   # any arguments to be provided to uninstaller (not for MSI usually)
+        [System.String]$UninstallScript=[System.String]::Empty,                                 # uninstall script, used for LoB apps
+        
         [System.String]$Homepage=[System.String]::Empty,                                        # URL of application
         [System.String]$IconUri=[System.String]::Empty,                                         # icon for optechx portal
         [System.String]$Docs=[System.String]::Empty,                                            # documentation link
         [System.String]$License=[System.String]::Empty,                                         # link to license or type of license
         [System.String[]]$Tags,                                                                 # list of tags
         [System.String]$Summary=[System.String]::Empty,                                         # summary of application 
-        [System.Boolean]$RebootRequired=$false,                                                 # is a reboot required
-        [Parameter(Mandatory=$true)][System.String]$LCID,                                       #^ language being supported here
-        [ValidateSet("mc","ftp","http","other")][System.String]$XFT,                            # transfer protocol (mc, ftp, http, etc)
-        [System.String]$Locale="au-syd1-07",                                                    # 
-        [System.String]$RepoGeo=[System.String]::Empty,                                         # 
-        [System.String]$Uri_Path=[System.String]::Empty,                                        # 
+        
+        
+        [Parameter(Mandatory=$true)]
+            [ValidateSet("mc","ftp","sftp","ftpes","http","https","s3","other")]
+            [System.String]$XFT,                                                                #^ transfer protocol (mc, ftp, http, etc)
+        [System.String]$Locale="upcloud_au_syd_07",                                             # 
+        [System.String]$UriPath=[System.String]::Empty,                                        # 
         [System.Boolean]$Enabled=$true,                                                         # 
         [System.String[]]$DependsOn=[System.String]::Empty,                                     # 
         [System.String]$NuspecUri=[System.String]::Empty,                                       # 
-        [System.Version]$SysInfo="4.5.0.0",                                                     # JSON Specification
+        [System.Version]$SysInfo="4.6.0.0",                                                     # JSON Specification
         [Parameter(Mandatory=$true)][System.String]$OutPath,                                    #^ 
         [System.String]$ApiBaseURI="http://localhost:8080"
     )
@@ -54,10 +79,10 @@ function Export-JsonManifest {
     process {
         [System.Guid]$Guid = [System.Guid]::NewGuid().Guid  # auto-generated
         [System.String]$UID  # UID ISO:1006 <publisher>::<app_name>::<version>::<arch>::<exe_type>::<lcid> (ie - google::chrome::94.33.110.22::x64::msi::en-US)
-        [System.String]$Key  # auto-generated
+        [System.String]$Key  # auto-generated further down
 
         #region UID_KEY
-        $UID = "$($Publisher.ToLower().Replace(' ',''))::$($Name.ToLower().Replace(' ',''))::${Version}::${Arch}::${ExecType}::${LCID}"
+        $UID = "$($Publisher.ToLower().Replace(' ',''))::$($Name.ToLower().Replace(' ',''))::${Version}::${Arch}::${ExecType}::${Lcid}"
         $Key = "$($Publisher.ToLower().Replace(' ',''))::$($Name.ToLower().Replace(' ',''))"
         #endregion UID_KEY
 
@@ -164,12 +189,76 @@ function Export-JsonManifest {
             
             #Invoke-WebRequest -Uri "$AbsoluteUri" -OutFile "$env:TMP\$FileName" -UseBasicParsing
             $SHA256 = Get-FileHash -Path "$env:TMP\$FileName" -Algorithm SHA256 | Select-Object -ExpandProperty Hash
-            $Uri_Path = "apps/${Publisher}/${Name}/${Version}/${Arch}/${FileName}"
+            $UriPath = "apps/${Publisher}/${Name}/${Version}/${Arch}/${FileName}"
             #endregion ABSOLUTE URI & FILENAME & HASH & LOCALE & REPOGEO
 
             #region Security Scans
-            $VTScanResultsId = New-VirusTotalScan -ApiKey $env:VT_API_KEY -FilePath "$env:TMP\$FileName" -BaseUri $env:API_BASE_URI
+            #$VTScanResultsId = New-VirusTotalScan -ApiKey $env:VT_API_KEY -FilePath "$env:TMP\$FileName" -BaseUri $env:API_BASE_URI
+            $VTScanResultsId = 1
             #endregion Security Scans
+
+
+            # does the application already have the required fields populated? If so, do not install and skip to the end
+            if (-not([System.String]::Empty -notlike $DisplayName -and `
+            [System.String]::Empty -notlike $DisplayVersion -and `
+            [System.String]::Empty -notlike $DisplayPublisher -and `
+            [System.String]::Empty -notlike $UninstallCmd))
+            {
+                #region INSTALL/UNINSTALL
+                <# INSTALL APPLICATION #>
+                Install-ApplicationPackage -InstallerType exe -PackageName $UID -FileName $FileName -InstallSwitches $InstallArgs -DLPath $env:TMP
+
+                <# VERIFY APPLICATION UNINSTALL #>
+                [System.String]$CsvInstallDump = "$env:TMP\CSV_INSTALL_DUMP.csv"
+                [System.String]$CsvPreDump = "$env:TMP\CSV_PRE-INSTALL_DUMP.csv"
+                if (Test-Path -Path $CsvInstallDump){ Remove-Item -Path $CsvInstallDump -Confirm:$false -Force }
+                Get-ChildItem -Path $hklmPaths | Get-ItemProperty | Where-Object -FilterScript {$null -notlike $_.DisplayName} | Export-Csv -Path $CsvInstallDump -NoTypeInformation
+                switch ($DetectMethod)
+                {
+                    'Registry'
+                    {
+                        $Count = 0
+
+                        <# VERIFY FROM REGISTRY #>
+                        $InstalledBefore = Import-Csv -Path $CsvPreDump | Select-Object -ExpandProperty DisplayName
+                        $InstalledAfter = Import-Csv -Path $CsvInstallDump | Select-Object -ExpandProperty DisplayName
+                        foreach ($Install in $InstalledAfter)
+                        {
+                            if ($InstalledBefore -notcontains $Install)
+                            {
+                                "FOUND INSTALL: ${Install}"
+                                $Count += 1
+                                <# READ DATA FROM REGISTRY #>
+                                $Mapped = Import-Csv -Path $CsvInstallDump | Where-Object -FilterScript {$_.DisplayName -like $Install}
+                                [System.String]$DisplayName = $Mapped.DisplayName
+                                [System.String]$DisplayVersion = $Mapped.DisplayVersion
+                                [System.String]$DisplayPublisher = $Mapped.Publisher
+                                [System.String]$UninstallCmd = $Mapped.UninstallString
+                                $DisplayName
+                                $DisplayVersion
+                                $DisplayPublisher
+                                $UninstallCmd
+
+                                # <# UNINSTALL APPLICATION #>
+                                # Uninstall-ApplicationPackage -UninstallClass $JsonData.uninstall.process -UninstallString $UninstallCmd -UninstallArgs $JsonData.uninstall.args -DisplayName $DisplayName -RebootRequired "N"
+                            }
+                            else
+                            {
+                            }
+                        }
+                    }
+                    Default
+                    {
+                        "Did not match 'Registry'"
+                    }
+                }
+                $Count
+                #endregion INSTALL/UNINSTALL
+            }
+            
+
+            <# DEFAULT EXPLOIT REPORT ID #>
+            $ExploitReportId = 1
 
             #region BUILD JSON
             $JsonDict.guid = $Guid.ToString()
@@ -178,7 +267,7 @@ function Export-JsonManifest {
             $JsonDict.id.name = $Name
             $JsonDict.id.version = $Version
             $JsonDict.id.arch = $Arch
-            $JsonDict.id.lcid = $LCID
+            $JsonDict.id.lcid = $Lcid
             $JsonDict.id.uid = $UID
             $JsonDict.id.key = $Key
             $JsonDict.id.category = $Category
@@ -198,14 +287,13 @@ function Export-JsonManifest {
             $JsonDict.meta.summary = $Summary
             $JsonDict.meta.xft = $XFT
             $JsonDict.meta.locale = $Locale
-            $JsonDict.meta.repogeo = $RepoGeo
-            $JsonDict.meta.uripath = $Uri_Path
+            $JsonDict.meta.uripath = $UriPath
             $JsonDict.meta.enabled = $Enabled
             $JsonDict.meta.dependson = $DependsOn
             $JsonDict.meta.nuspecuri = $NuspecUri
 
             $JsonDict.install.exectype = $ExecType
-            $JsonDict.install.installswitches = $InstallSwitches
+            $JsonDict.install.installswitches = $InstallArgs
             $JsonDict.install.rebootrequired = $RebootRequired
             $JsonDict.install.displayname = $DisplayName
             $JsonDict.install.displaypublisher = $DisplayPublisher
@@ -214,20 +302,21 @@ function Export-JsonManifest {
             $JsonDict.install.detectvalue = $DetectValue
             
             $JsonDict.uninstall.process = $UninstallProcess
-            $JsonDict.uninstall.string = $UninstallString
+            $JsonDict.uninstall.cmd = $UninstallCmd
             $JsonDict.uninstall.args = $UninstallArgs
 
             $JsonDict.security.virustotalscanresultsid = $VTScanResultsId
-            $JsonDict.security.exploitreportid = 0
+            $JsonDict.security.exploitreportid = $ExploitReportId
 
             $JsonDict.sysinfo = $SysInfo
 
             $OutFilePath = Join-Path -Path $OutPath -ChildPath "${UID}.json".Replace('::','_')
-            $JsonDict | ConvertTo-Json -Depth 4 | Out-File -FilePath $OutFilePath -Encoding utf8 -Force -Confirm:$false
+            $JsonDict | ConvertTo-Json -Depth 4 | Out-File -FilePath $OutFilePath -Encoding utf8 -Force -Confirm:$false #Set-Content -Path $OutFilePath -Encoding utf8 -Confirm:$false -Force
             Write-Output "$([System.Char]::ConvertFromUTF32("0x1F7E1")) JSON MANIFEST OUTPUT: [ ${OutFilePath} ]"
             #endregion BUILD JSON
 
             return $OutFilePath
+
         }
     }
     
