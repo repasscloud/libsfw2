@@ -47,6 +47,6 @@ foreach ($sf in $SourceFiles)
 }
 
 Get-ChildItem -Path $env:APPVEYOR_BUILD_FOLDER -Filter "*.json" -File -Recurse | ForEach-Object {
-    $_.FullName
+    Get-Content -Path $_.FullName
     #Invoke-OXAppIngest -BaseUri $env:API_BASE_URI -JsonPayload $_.FullName
 }
