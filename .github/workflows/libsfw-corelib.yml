@@ -1,0 +1,42 @@
+name: "libsfw CoreLib Applications"
+on:
+  push:
+    branches: [ 'main','gh-actions' ]
+  pull_request:
+    branches: [ 'main' ]
+  
+  workflow_dispatch:
+  
+jobs:
+  Windows-CoreLib:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v2
+        with:
+          dotnet-version: |
+            2.2.x
+      
+      - name: Add MSBUILD to env:PATH
+        uses: microsoft/setup-msbuild@v1.1
+      
+      - name: OptechX DownloadFile DLL
+        run: git clone -q --branch=main https://github.com/danijeljw-RPC/optechx.DownloadFile.git .\dlfile
+      
+      - name: Build dotnet projects
+        run: |
+          dotnet restore .\dlfile\optechx.DownloadFile\optechx.DownloadFile.csproj
+          msbuild .\dlfile\optechx.DownloadFile.sln -t:rebuild -verbosity:minimal -property:Configuration=Release
+      
+      - name: create directories
+        run: |
+          mkdir -p C:\odf
+          Copy-Item -Path .\dlfile\optechx.DownloadFile\bin\Release\netcoreapp2.2\* -Destination C:\odf\ -Recurse
+        
+      - name: Get installed Applications"
+        run: |
+          [System.Array]$hklmPaths = @('HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall','HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall')
+          Get-ChildItem -Path $hklmPaths | Get-ItemProperty | Where-Object -FilterScript {$null -notlike $_.DisplayName} | Select-Object -ExpandProperty DisplayName
