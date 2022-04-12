@@ -1,0 +1,49 @@
+<# SET VARIABLES #>
+[System.String]$ProjectRoot = Split-Path -Path $PSScriptRoot -Parent
+
+<# LOAD FUNCTIONS #>
+[System.String[]]$Functions = "GHExport-JsonManifest.ps1","Get-AbsoluteUri.ps1","New-GitHubIssue.ps1","New-VirusTotalScan.ps1","Invoke-OXAppIngest.ps1","Install-ApplicationPackage.ps1","Uninstall-ApplicationPackage.ps1"
+foreach ($function in $Functions)
+{
+    Get-ChildItem -Path $ProjectRoot\libsfw-ps -Filter "${function}" -File | ForEach-Object { . $_.FullName }
+}
+
+<# SOURCE CORELIB FILES #>
+[System.String[]]$SourceFiles = Get-ChildItem -Path $ProjectRoot\data\corelib\ -Filter "*.ps1" -File -Recurse | Select-Object -ExpandProperty FullName
+foreach ($sf in $SourceFiles)
+{
+    <# DOT SOURCE FILE #>
+    . $sf
+
+    <# GENERATE JSON MANIFEST #>
+    GHExport-JsonManifest -Category $adr_category `
+    -Publisher $adr_publisher `
+    -Name $adr_name `
+    -Version $adr_version `
+    -Copyright $adr_copyright `
+    -LicenseAcceptRequired $adr_licenseacceptrequired `
+    -LCID $adr_lcid `
+    -Arch $adr_arch `
+    -FollowUri $adr_followuri `
+    -AbsoluteUri $adr_absoluteuri `
+    -ExecType $adr_exectype `
+    -InstallCmd $adr_installcmd `
+    -InstallArgs $adr_installargs `
+    -DisplayName $adr_displayname `
+    -DisplayPublisher $adr_displaypublisher `
+    -DisplayVersion $adr_displayversion `
+    -DetectMethod $adr_detectmethod `
+    -DetectValue $adr_detectvalue `
+    -UninstallProcess $adr_uninstallprocess `
+    -UninstallCmd $adr_uninstallcmd `
+    -UninstallArgs $adr_uninstallargs `
+    -RebootRequired $adr_rebootrequired `
+    -XFT $adr_xft `
+    -Locale $adr_locale `
+    -OutPath $PSScriptRoot `
+    -NuspecUri $adr_nuspec    
+}
+
+Get-ChildItem -Path $env:APPVEYOR_BUILD_FOLDER -Filter "*.json" -File -Recurse | ForEach-Object {
+    Invoke-OXAppIngest -BaseUri $env:API_BASE_URI -JsonPayload $_.FullName
+}
