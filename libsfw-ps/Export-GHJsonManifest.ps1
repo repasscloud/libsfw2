@@ -1,61 +1,61 @@
-function Export-JsonManifest {
+function Export-GHJsonManifest {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory=$true)]
             [ValidateSet("Productivity","Microsoft","Utility","Developer Tools",
             "Games","Photo & Design","Entertainment","Security","Education",
             "Internet","Lifestyles")]
-        [System.String]$Category,                                                               #^ select from categories
-        [Parameter(Mandatory=$true)][System.String]$Publisher,                                  #^ publisher name
-        [Parameter(Mandatory=$true)][System.String]$Name,                                       #^ application name
-        [Parameter(Mandatory=$true)][System.String]$Version,                                    #^ application version
-        [System.String]$Copyright=[System.String]::Empty,                                       # copyright notice
-        [System.Boolean]$LicenseAcceptRequired=$false,                                          # should default to true only if is required
-        [System.Boolean]$RebootRequired=$false,                                                 # is a reboot required
-        [Parameter(Mandatory=$true)][System.String]$Lcid,                                       #^ language being supported here  <~ too many languages to isolate here https://github.com/repasscloud/libsfw-ps/issues/5#issuecomment-1086025038
+        [System.String]$Category,                                                   #^ select from categories
+        [Parameter(Mandatory=$true)][System.String]$Publisher,                      #^ publisher name
+        [Parameter(Mandatory=$true)][System.String]$Name,                           #^ application name
+        [Parameter(Mandatory=$true)][System.String]$Version,                        #^ application version
+        [System.String]$Copyright=[System.String]::Empty,                           # copyright notice
+        [System.Boolean]$LicenseAcceptRequired=$false,                              # should default to true only if is required
+        [System.Boolean]$RebootRequired=$false,                                     # is a reboot required
+        [Parameter(Mandatory=$true)][System.String[]]$Lcid,                         #^ language being supported here  <~ too many languages to isolate here https://github.com/repasscloud/libsfw-ps/issues/5#issuecomment-1086025038
         [Parameter(Mandatory=$true)]
             [ValidateSet("x64","x86","aarch32","arm64")]
-            [System.String]$Arch,                                                               #^ architecture of cpu
-        [System.String]$FileName=[System.String]::Empty,                                        #% file name
-        [System.String]$SHA256=[System.String]::Empty,                                          #% sha256 hash
-        [Parameter(Mandatory=$true)][System.String]$FollowUri,                                  #^ uri provided to search for
-        [System.String]$AbsoluteUri,                                                            #% the follow_on uri found
+            [System.String[]]$CpuArch,                                              #^ supported CPU Arch collection 
+        [Parameter(Mandatory=$true)]
+            [ValidateSet("x64","x86","aarch32","arm64")]
+            [System.String]$TargetCpuArch,                                          #^ architecture of target cpu for child manifest
+        [System.String]$FileName=[System.String]::Empty,                            #% file name
+        [Parameter(Mandatory=$true)][System.String]$FollowUri,                      #^ uri provided to search for
+        [System.String]$AbsoluteUri=[System.String]::Empty,                                                #% the follow_on uri found
         [Parameter(Mandatory=$true)]
         [ValidateSet("msi","msix","exe","bat","ps1","zip","script","cab")]
-            [System.String]$ExecType,                                                           #^ executable type
-        [System.String]$InstallCmd=[System.String]::Empty,                                      # which install cmd
-        [System.String]$InstallArgs=[System.String]::Empty,                                     # which install arguments
-        [System.String]$InstallScript=[System.String]::Empty,                                   # which install script, must be a full script, used for LoB apps
-        [System.String]$DisplayName=[System.String]::Empty,                                     #% registry display name (should be provided to identify)
-        [System.String]$DisplayPublisher=[System.String]::Empty,                                #% registry display publisher
-        [System.String]$DisplayVersion=[System.String]::Empty,                                  #% registry display version
+            [System.String]$Executable,                                             #^ executable type
+        [System.String]$InstallCmd=[System.String]::Empty,                          # which install cmd
+        [System.String]$InstallArgs=[System.String]::Empty,                         # which install arguments
+        [System.String]$InstallScript=[System.String]::Empty,                       # which install script, must be a full script, used for LoB apps
+        [System.String]$DisplayName=[System.String]::Empty,                         #% registry display name (should be provided to identify)
+        [System.String]$DisplayPublisher=[System.String]::Empty,                    #% registry display publisher
+        [System.String]$DisplayVersion=[System.String]::Empty,                      #% registry display version
         [ValidateSet("Registry","FileVersion","File","Script","Void")]
-            [System.String]$DetectMethod,                                                       # how is app detected (registry, fileversion, filematched, script)
-        [System.String]$DetectValue=[System.String]::Empty,                                     # the value for the DetectMethod, not compatible with DetectScript
-        [System.String]$DetectScript=[System.String]::Empty,                                    # script to detect application, used for LoB apps
+            [System.String]$PackageDetection,                                       # how is app detected (registry, fileversion, filematched, script)
+        [System.String]$DetectValue=[System.String]::Empty,                         # the value for the DetectMethod, not compatible with DetectScript
+        [System.String]$DetectScript=[System.String]::Empty,                        # script to detect application, used for LoB apps
         [Parameter(Mandatory=$true)]
             [ValidateSet("void_uninstall","msi","exe","exe2","inno","script")]
-            [System.String]$UninstallProcess=[System.String]::Empty,                            #% exe, exe2, msi, etc
-        [System.String]$UninstallCmd=[System.String]::Empty,                                    # how is the uninstall proceessed (used with -UninstallProcess)
-        [System.String]$UninstallArgs=[System.String]::Empty,                                   # any arguments to be provided to uninstaller (not for MSI usually)
-        [System.String]$UninstallScript=[System.String]::Empty,                                 # uninstall script, used for LoB apps
-        [System.String]$Homepage=[System.String]::Empty,                                        # URL of application
-        [System.String]$IconUri=[System.String]::Empty,                                         # icon for optechx portal
-        [System.String]$Docs=[System.String]::Empty,                                            # documentation link
-        [System.String]$License=[System.String]::Empty,                                         # link to license or type of license
-        [System.String[]]$Tags,                                                                 # list of tags
-        [System.String]$Summary=[System.String]::Empty,                                         # summary of application 
+            [System.String]$UninstallProcess=[System.String]::Empty,                #% exe, exe2, msi, etc
+        [System.String]$UninstallCmd=[System.String]::Empty,                        # how is the uninstall proceessed (used with -UninstallProcess)
+        [System.String]$UninstallArgs=[System.String]::Empty,                       # any arguments to be provided to uninstaller (not for MSI usually)
+        [System.String]$UninstallScript=[System.String]::Empty,                     # uninstall script, used for LoB apps
+        [System.String]$Homepage=[System.String]::Empty,                            # URL of application
+        [System.String]$IconUri=[System.String]::Empty,                             # icon for optechx portal
+        [System.String]$Docs=[System.String]::Empty,                                # documentation link
+        [System.String]$License=[System.String]::Empty,                             # link to license or type of license
+        [System.String[]]$Tags=[System.String]::Empty,                                                     # list of tags
+        [System.String]$Summary=[System.String]::Empty,                             # summary of application 
         [Parameter(Mandatory=$true)]
             [ValidateSet("mc","ftp","sftp","ftpes","http","https","s3","other")]
-            [System.String]$XFT,                                                                #^ transfer protocol (mc, ftp, http, etc)
-        [System.String]$Locale="upcloud_au_syd_07",                                             # 
-        [System.String]$UriPath=[System.String]::Empty,                                        # 
-        [System.Boolean]$Enabled=$true,                                                         # 
-        [System.String[]]$DependsOn=[System.String]::Empty,                                     # 
-        [System.String]$NuspecUri=[System.String]::Empty,                                       # 
-        [System.Version]$SysInfo="4.6.0.0",                                                     # JSON Specification
-        [Parameter(Mandatory=$true)][System.String]$OutPath                                     #^ 
-
+            [System.String]$XFT,                                                    #^ transfer protocol (mc, ftp, http, etc)
+        [System.String]$Locale="upcloud_au_syd_07",                                 # 
+        [System.String]$UriPath=[System.String]::Empty,                             # 
+        [System.Boolean]$Enabled=$true,                                             # 
+        [System.String[]]$DependsOn=[System.String]::Empty,                         # 
+        [System.String]$NuspecUri=[System.String]::Empty,                           # 
+        [System.String]$ApiBaseUri="https://engine.api.dev.optechx-data.com"
     )
     
     begin
@@ -67,37 +67,29 @@ function Export-JsonManifest {
     
     process
     {
-        <# AUTO GENERATE UUID/GUID #>
+        <# AUTO GENERATE UUID (GUID) #>
         [System.Guid]$Guid = [System.Guid]::NewGuid().Guid
+        [System.Guid]$PackageGuid = [System.Guid]::NewGuid().Guid
 
         <# ESTABLISH UID AND KEY #>
-        [System.String]$UID  # UID ISO:1006 <publisher>::<app_name>::<version>::<arch>::<exe_type>::<lcid> (ie - google::chrome::94.33.110.22::x64::msi::en-US)
-        [System.String]$Key  # auto-generated further down
-        $UID = "$($Publisher.ToLower().Replace(' ',''))::$($Name.ToLower().Replace(' ',''))::${Version}::${Arch}::${ExecType}::${Lcid}"
-        $Key = "$($Publisher.ToLower().Replace(' ',''))::$($Name.ToLower().Replace(' ',''))"
+        [System.String]$UID = "$($Publisher.ToLower().Replace(' ',''))::$($Name.ToLower().Replace(' ',''))::${Version}"
+        [System.String]$PackageUID = "$($Publisher.ToLower().Replace(' ',''))::$($Name.ToLower().Replace(' ',''))::${Version}::${TargetCpuArch}::${Lcid}"
 
-        <# VERIFY UID AGAINST API #>
+        #region Verify UID Against API Parent Object Else Create
+        <# VERIFY UID AGAINST API PARENT OBJECT ELSE CREATE #>
         $CHeaders = @{accept = 'text/json'}
         try
         {
-            Invoke-RestMethod -Uri "${env:API_BASE_URI}/api/Application/uid/${UID}" -Method Get -Headers $CHeaders -ErrorAction Stop | Out-Null
+            Invoke-RestMethod -Uri "${env:API_BASE_URI}/v1/Application/uid/${UID}" -Method Get -Headers $CHeaders -ErrorAction Stop | Out-Null
             Write-Output "$([System.Char]::ConvertFromUTF32("0x1F7E2")) APPLICATION MATCHED: [ ${UID} ]"
-            # go to end, nothing left to do
+            # go to end, nothing left to do, well, there is ~> have to create the child object now
         }
         catch
         {
             <# START MAIN PROCESS AS CATCH STATEMENT #>
             Write-Output "$([System.Char]::ConvertFromUTF32("0x1F7E1")) BUILDING JSON MANIFEST: [ ${Publisher} ${Name} ${Arch} ${ExecType} ]"
 
-            <# JSON DATA STRUCTURE - DO NOT EDIT #>
-            $JsonDict = [System.Collections.Specialized.OrderedDictionary]@{}
-            $JsonDict.id = [System.Collections.Specialized.OrderedDictionary]@{}
-            $JsonDict.meta = [System.Collections.Specialized.OrderedDictionary]@{}
-            $JsonDict.install = [System.Collections.Specialized.OrderedDictionary]@{}
-            $JsonDict.uninstall = [System.Collections.Specialized.OrderedDictionary]@{}
-            $JsonDict.security = [System.Collections.Specialized.OrderedDictionary]@{}
-            $JsonDict.sysinfo = [System.Collections.Specialized.OrderedDictionary]@{}
-
+            #region Nuspec File Ingest
             <# NUSPEC FILE INGEST #>
             if ($null -notlike $NuspecUri)
             {
@@ -111,18 +103,14 @@ function Export-JsonManifest {
                 {
                     # now that Nuspec is downloaded and verified, try to get data out of it
                     [xml]$XmlNuspec = Get-Content -Path "$($env:TMP)\nuspec.xml" -ErrorAction Stop
-                    # if ($XmlNuspec.package.metadata.version) { if(-not($Version)){$Version=$XmlNuspec.package.metadata.version} }
-                    # if ($XmlNuspec.package.metadata.authors) { if(-not($Publisher)){$Publisher=$XmlNuspec.package.metadata.authors} }
                     if ($XmlNuspec.package.metadata.projectUrl) { if(-not($Homepage)){$Homepage=$XmlNuspec.package.metadata.projectUrl} }
                     if ($XmlNuspec.package.metadata.docsUrl) { if(-not($Docs)){$Docs=$XmlNuspec.package.metadata.docsUrl} }
                     if ($XmlNuspec.package.metadata.iconUrl) { if(-not($IconUri)){$IconUri=$XmlNuspec.package.metadata.iconUrl} }
                     if ($XmlNuspec.package.metadata.copyright) { if(-not($Copyright)){$Copyright=$XmlNuspec.package.metadata.copyright} }
                     if ($XmlNuspec.package.metadata.licenseUrl) { if(-not($License)){$License=$XmlNuspec.package.metadata.licenseUrl} }
                     if ($XmlNuspec.package.metadata.requireLicenseAcceptance) { if('true' -like $XmlNuspec.package.metadata.requireLicenseAcceptance){$LicenseAcceptRequired=$true}else{$LicenseAcceptRequired=$false} }
-                    # if ($XmlNuspec.package.metadata.id) { if(-not($Name)){$Name=$XmlNuspec.package.metadata.id} }
                     if ($XmlNuspec.package.metadata.summary) { if(-not($Summary)){$Summary=$XmlNuspec.package.metadata.summary} }
                     if ($XmlNuspec.package.metadata.tags) { if(-not($Tags)){$Tags=($XmlNuspec.package.metadata.tags).Split(' ')} }
-                    # if ($XmlNuspec.package.metadata.dependencies) { $DependsOn }
                 }
                 catch
                 {
@@ -133,7 +121,59 @@ function Export-JsonManifest {
             {
                 Write-Output "$([System.Char]::ConvertFromUTF32("0x1F7E0")) NUSPEC NOT PROVIDED"
             }
+            #endregion Nuspec File Ingest
+
+            #region Application Object
+            <# JSON DATA STRUCTURE - DO NOT EDIT #>
+            $GHJsonObj = [System.Collections.Specialized.OrderedDictionary]@{}
+
+            <# GH JSON OBJECT ADD DATA #>
+            $GHJsonObj.id = 0
+            $GHJsonObj.uuid = $Guid
+            $GHJsonObj.uid = $UID
+            $GHJsonObj.applicationCategory = $Category
+            $GHJsonObj.publisher = $Publisher
+            $GHJsonObj.name = $Name
+            $GHJsonObj.version = $Version
+            $GHJsonObj.copyright = $Copyright
+            $GHJsonObj.licenseAcceptRequired = $LicenseAcceptRequired
+            $GHJsonObj.lcid = $Lcid
+            $GHJsonObj.cpuArch = $CpuArch
+            $GHJsonObj.homepage = $Homepage
+            $GHJsonObj.icon = $IconUri
+            $GHJsonObj.docs = $Docs
+            $GHJsonObj.license = $License
+            $GHJsonObj.tags = $Tags
+            $GHJsonObj.summary = $Summary
+            $GHJsonObj.enabled = $true
+            $GHJsonObj.lastUpdate = $((Get-Date).ToString('yyyyMMdd'))
+
+            <# CONVERT DICTIONARY TO JSON OBJECT #>
+            $GHJsonObj | ConvertTo-Json
             
+            <# PUT PARENT OBJECT INTO API DB #>
+            try
+            {
+                Invoke-RestMethod -Uri "${ApiBaseUri}/v1/Application" -Method Post -UseBasicParsing -Body $GHJsonObj -ContentType "application/json" -ErrorAction Stop
+            }
+            catch
+            {
+                $_.Exception.Message
+                return 1
+            }
+            #endregion Application Object
+        }
+        #endregion Verify UID Against API Parent Object Else Create
+           
+        $CHeaders = @{accept = 'text/json'}
+        try
+        {
+            Invoke-RestMethod -Uri "${ApiBaseUri}/v1/Application/uid/${PackageUID}" -Method Get -Headers $CHeaders -ErrorAction Stop | Out-Null
+            Write-Output "$([System.Char]::ConvertFromUTF32("0x1F7E2")) APPLICATION PAYLOAD MATCHED: [ ${PackageUID} ]"
+            # go to end, nothing left to do
+        }
+        catch
+        {
             <# ABSOLUTE URI AND FOLLOW URI #>
             Write-Output "$([System.Char]::ConvertFromUTF32("0x1F7E1")) FOLLOW URI: [ ${FollowUri} ]"
             if (-not($AbsoluteUri))
@@ -146,7 +186,7 @@ function Export-JsonManifest {
                 catch
                 {
                     Write-Output "$([System.Char]::ConvertFromUTF32("0x1F7E0")) FOLLOW URI NOT FOUND: [ ${FollowUri} ]"
-                    [System.String]$GHIssueNumber = New-GitHubIssue -Title "FollowUri Not Found: ${UID}" -Body "FollowUri Not Found: $FollowUri`r`n`r`nUID: ${UID}" -Labels @("ci-followuri-not-found") -Repository 'libsfw2' -Token $env:GH_TOKEN
+                    [System.String]$GHIssueNumber = New-GitHubIssue -Title "FollowUri Not Found: ${PackageUID}" -Body "FollowUri Not Found: $FollowUri`r`n`r`nUID: ${PackageUID}" -Labels @("ci-followuri-not-found") -Repository 'libsfw2' -Token $env:GH_TOKEN
                     Write-Output "$([System.Char]::ConvertFromUTF32("0x1F534")) GH Issue: ${GHIssueNumber}"
                     return
                 }
@@ -180,10 +220,10 @@ function Export-JsonManifest {
             catch
             {
                 "$([System.Char]::ConvertFromUTF32("0x1F534")) UNABLE TO DOWNLOAD FILE"
-                [System.String]$GHIssueNumber = New-GitHubIssue -Title "Unable to download file: ${UID}" -Body "File not downloaded using odf: $FileName`r`n`r`nUID: ${UID}" -Labels @("ci-file-not-downloaded") -Repository 'libsfw-ps' -Token $env:GH_TOKEN
+                [System.String]$GHIssueNumber = New-GitHubIssue -Title "Unable to download file: ${PackageUID}" -Body "File not downloaded using odf: $FileName`r`n`r`nUID: ${PackageUID}" -Labels @("ci-file-not-downloaded") -Repository 'libsfw-ps' -Token $env:GH_TOKEN
                 return
             }
-            
+
             <# SET SHA256 #>
             $SHA256 = Get-FileHash -Path "$env:TMP\$FileName" -Algorithm SHA256 | Select-Object -ExpandProperty Hash
 
@@ -205,10 +245,13 @@ function Export-JsonManifest {
                 default {
                     $UriPath = "FILE NOT UPLOADED"
                 }
+                "http" {
+                    $UriPath = [System.String]::Empty
+                }
             }
 
             #region Security Scans
-            #$VTScanResultsId = New-VirusTotalScan -ApiKey $env:VT_API_KEY -FilePath "$env:TMP\$FileName" -BaseUri $env:API_BASE_URI
+            #$VTScanResultsId = New-VirusTotalScan -ApiKey $env:VT_API_KEY -FilePath "$env:TMP\$FileName" -BaseUri $ApiBaseUri
             $VTScanResultsId = 1
             #endregion Security Scans
 
@@ -221,7 +264,7 @@ function Export-JsonManifest {
             {
                 #region INSTALL/UNINSTALL
                 <# INSTALL APPLICATION #>
-                Install-ApplicationPackage -InstallerType exe -PackageName $UID -FileName $FileName -InstallSwitches $InstallArgs -DLPath $env:TMP
+                Install-ApplicationPackage -InstallerType exe -PackageName $PackageUID -FileName $FileName -InstallSwitches $InstallArgs -DLPath $env:TMP
 
                 <# VERIFY APPLICATION UNINSTALL #>
                 [System.String]$CsvInstallDump = "$env:TMP\CSV_INSTALL_DUMP.csv"
@@ -276,61 +319,53 @@ function Export-JsonManifest {
             $ExploitReportId = 1
 
             #region BUILD JSON
-            $JsonDict.guid = $Guid.ToString()
-
-            $JsonDict.id.publisher = $Publisher
-            $JsonDict.id.name = $Name
-            $JsonDict.id.version = $Version
-            $JsonDict.id.arch = $Arch
-            $JsonDict.id.lcid = $Lcid
-            $JsonDict.id.uid = $UID
-            $JsonDict.id.key = $Key
-            $JsonDict.id.category = $Category
-
-            $JsonDict.meta.sha256 = $SHA256
-            $JsonDict.meta.filename = $FileName
-            $JsonDict.meta.followuri = $FollowUri
-            $JsonDict.meta.absoluteuri = $AbsoluteUri
-            $JsonDict.meta.copyright = $Copyright
-            $JsonDict.meta.license = $License
-            $JsonDict.meta.licenseacceptrequired = $LicenseAcceptRequired
-            $JsonDict.meta.homepage = $Homepage
-            $JsonDict.meta.iconuri = $IconUri
-            $JsonDict.meta.docs = $Docs
-            $JsonDict.meta.summary = $Summary
-            $JsonDict.meta.tags = $Tags
-            $JsonDict.meta.summary = $Summary
-            $JsonDict.meta.xft = $XFT
-            $JsonDict.meta.locale = $Locale
-            $JsonDict.meta.uripath = $UriPath
-            $JsonDict.meta.enabled = $Enabled
-            $JsonDict.meta.dependson = $DependsOn
-            $JsonDict.meta.nuspecuri = $NuspecUri
-
-            $JsonDict.install.exectype = $ExecType
-            $JsonDict.install.installswitches = $InstallArgs
-            $JsonDict.install.rebootrequired = $RebootRequired
-            $JsonDict.install.displayname = $DisplayName
-            $JsonDict.install.displaypublisher = $DisplayPublisher
-            $JsonDict.install.displayversion = $DisplayVersion
-            $JsonDict.install.detectmethod = $DetectMethod
-            $JsonDict.install.detectvalue = $DetectValue
+            $PackageObj = @{
+                id = 0
+                uuid = $PackageGuid
+                uid = $PackageUID
+                lastUpdate = $((Get-Date).ToString('yyyyMMdd'))
+                version = $Version
+                rebootRequired = $RebootRequired
+                lcid = $Lcid
+                cpuArch = $TargetCpuArch
+                fileName = $FileName
+                sha256 = $SHA256
+                followUri = $FollowUri
+                absoluteUri = $AbsoluteUri
+                executable = $Executable
+                installCmd = $InstallCmd
+                installArgs = $InstallArgs
+                installScript = $InstallScript
+                displayName = $DisplayName
+                displayPublisher = $DisplayPublisher
+                displayVersion = $DisplayVersion
+                packageDetection = $PackageDetection
+                detectValue = $DetectValue
+                detectScript = $DetectScript
+                uninstallProcess = $UninstallProcess
+                uninstallCmd = $UninstallCmd
+                uninstallArgs = $UninstallArgs
+                uninstallScript = $UninstallScript
+                transferMethod = $XFT
+                locale = $Locale
+                uriPath = $UriPath
+                enabled = $Enabled
+                dependsOn = $DependsOn
+                virusTotalScanResultsId = $VTScanResultsId
+                exploitReportId = $ExploitReportId
+            } | ConvertTo-Json
             
-            $JsonDict.uninstall.process = $UninstallProcess
-            $JsonDict.uninstall.cmd = $UninstallCmd
-            $JsonDict.uninstall.args = $UninstallArgs
-
-            $JsonDict.security.virustotalscanresultsid = $VTScanResultsId
-            $JsonDict.security.exploitreportid = $ExploitReportId
-
-            $JsonDict.sysinfo = $SysInfo
-
-            $OutFilePath = Join-Path -Path $OutPath -ChildPath "${UID}.json".Replace('::','_')
-            $JsonDict | ConvertTo-Json -Depth 4 | Out-File -FilePath $OutFilePath -Encoding utf8 -Force -Confirm:$false #Set-Content -Path $OutFilePath -Encoding utf8 -Confirm:$false -Force
-            Write-Output "$([System.Char]::ConvertFromUTF32("0x1F7E1")) JSON MANIFEST OUTPUT: [ ${OutFilePath} ]"
+            <# PUT PARENT OBJECT INTO API DB #>
+            try
+            {
+                Invoke-RestMethod -Uri "${ApiBaseUri}/v1/ApplicationPackage" -Method Post -UseBasicParsing -Body $PackageObj -ContentType "application/json" -ErrorAction Stop
+            }
+            catch
+            {
+                $_.Exception.Message
+                return 1
+            }
             #endregion BUILD JSON
-
-            return $OutFilePath
         }
     }
     
