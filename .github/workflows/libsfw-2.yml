@@ -1,4 +1,4 @@
-name: "libsfw CoreLib Applications"
+name: LIBSFW-2
 on:
   push:
     branches: [ 'main','gh-actions' ]
