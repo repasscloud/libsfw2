@@ -31,12 +31,17 @@ jobs:
           dotnet restore .\dlfile\optechx.DownloadFile\optechx.DownloadFile.csproj
           msbuild .\dlfile\optechx.DownloadFile.sln -t:rebuild -verbosity:minimal -property:Configuration=Release
       
-      - name: create directories
+      - name: mkdir C:\ODF
         run: |
           mkdir -p C:\odf
           Copy-Item -Path .\dlfile\optechx.DownloadFile\bin\Release\netcoreapp2.2\* -Destination C:\odf\ -Recurse
         
-      - name: Get installed Applications"
+      - name: Export CurrentVersion\Uninstall from Registry
         run: |
           [System.Array]$hklmPaths = @('HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall','HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall')
-          Get-ChildItem -Path $hklmPaths | Get-ItemProperty | Where-Object -FilterScript {$null -notlike $_.DisplayName} | Select-Object -ExpandProperty DisplayName
+          Get-ChildItem -Path $hklmPaths | Get-ItemProperty | Where-Object -FilterScript {$null -notlike $_.DisplayName} | Select-Object DisplayName,DisplayVersion,Publisher,UninstallString | Export-Csv -Path .\reg_data_github.csv -NoTypeInformation
+          dir .
+
+      - name: Install mc.exe
+        run: | 
+
