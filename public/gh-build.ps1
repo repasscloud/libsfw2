@@ -15,12 +15,14 @@ foreach ($sf in $SourceFiles)
     <# DOT SOURCE FILE #>
     . $sf
 
-    $adr_followuri
-
     <# VERIFY FOLLOW URI AND ABSOLUTE URI BEFORE INJECT #>
+    Write-Output "$([System.Char]::ConvertFromUTF32("0x1F7E1")) TESTING UID: [ ${adr_uid} ]"
     if ((Get-RedirectedUri -Uri $adr_followuri) -notlike "INVALID")
     {
-        "IT'S NOT FISHY"
+        
     }
-
+    else
+    {
+        Write-Output "$([System.Char]::ConvertFromUTF32("0x1F534")) INVALID URI: [ ${adr_followuri} ]"
+    }
 }
