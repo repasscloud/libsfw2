@@ -10,6 +10,9 @@ on:
 jobs:
   Windows-CoreLib:
     runs-on: windows-latest
+    defaults:
+      run:
+        shell: pwsh
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -30,18 +33,14 @@ jobs:
         run: |
           dotnet restore .\dlfile\optechx.DownloadFile\optechx.DownloadFile.csproj
           msbuild .\dlfile\optechx.DownloadFile.sln -t:rebuild -verbosity:minimal -property:Configuration=Release
-      
-      - name: mkdir C:\ODF
-        run: |
           mkdir -p C:\odf
           Copy-Item -Path .\dlfile\optechx.DownloadFile\bin\Release\netcoreapp2.2\* -Destination C:\odf\ -Recurse
-        
+          Remove-Item -Path .\dlfile -Recurse -Force -Confirm:$false
+
       - name: Export CurrentVersion\Uninstall from Registry
         run: |
           [System.Array]$hklmPaths = @('HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall','HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall')
           Get-ChildItem -Path $hklmPaths | Get-ItemProperty | Where-Object -FilterScript {$null -notlike $_.DisplayName} | Select-Object DisplayName,DisplayVersion,Publisher,UninstallString | Export-Csv -Path .\reg_data_github.csv -NoTypeInformation
-          dir .
 
-      - name: Install mc.exe
-        run: | 
-
+      - name: Main sequence
+        run: public/gh-build.ps1
