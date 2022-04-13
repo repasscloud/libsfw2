@@ -15,8 +15,10 @@ foreach ($sf in $SourceFiles)
     <# DOT SOURCE FILE #>
     . $sf
 
+    $adr_followuri
+
     <# VERIFY FOLLOW URI AND ABSOLUTE URI BEFORE INJECT #>
-    if ((Get-RedirectedUri -Uri $adr_followuri) -notlike "INVADLI")
+    if ((Get-RedirectedUri -Uri $adr_followuri) -notlike "INVALID")
     {
         "IT'S NOT FISHY"
     }
