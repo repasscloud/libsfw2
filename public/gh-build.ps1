@@ -19,7 +19,8 @@ foreach ($sf in $SourceFiles)
     Write-Output "$([System.Char]::ConvertFromUTF32("0x1F7E1")) TESTING UID: [ ${adr_uid} ]"
     if ((Get-RedirectedUri -Uri $adr_followuri) -notlike "INVALID")
     {
-        
+        New-ApplicationObject -ApplicationCategory $adr_category -Publisher $adr_publisher -Name $adr_name -Version $adr_version -Copyright $adr_copyright `
+        -RebootRequired $adr_rebootrequired -Lcid $adr_lcid -CpuArch $adr_arch
     }
     else
     {
