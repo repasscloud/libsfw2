@@ -20,7 +20,7 @@ foreach ($sf in $SourceFiles)
     if ((Get-RedirectedUri -Uri $adr_followuri) -notlike "INVALID")
     {
         New-ApplicationObject -ApplicationCategory $adr_category -Publisher $adr_publisher -Name $adr_name -Version $adr_version -Copyright $adr_copyright `
-        -RebootRequired $adr_rebootrequired -Lcid $adr_lcid -CpuArch $adr_arch
+        -RebootRequired $adr_rebootrequired -Lcid $adr_lcid -CpuArch $adr_arch -NuspecURI $adr_nuspec
     }
     else
     {
